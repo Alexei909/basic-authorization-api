@@ -32,26 +32,48 @@ public class JwtTokenUtilsImpl implements JwtTokenUtils {
     @Value("${jwt.refresh.lifetime}")
     private Duration refreshTokenLifeTime;
 
+    @Override
     public String generateAccessToken(UserDetails userDetails) {
         return this.generateToken(userDetails, this.accessTokenSecret, this.accessTokenLifeTime);
     }
 
+    @Override
     public String generateRefreshToken(UserDetails userDetails) {
         return this.generateToken(userDetails, this.refreshTokenSecret, this.refreshTokenLifeTime);
     }
 
+    @Override
+    public boolean validateToken(String token, TokenType type) {
+        String tokenSecret = "";
+        if (type.compareTo(TokenType.ACCESS) == 0) {
+            tokenSecret = this.accessTokenSecret;
+        } else if (type.compareTo(TokenType.REFRESH) == 0) {
+            tokenSecret = this.refreshTokenSecret;
+        }
+        try {
+            this.getClaims(token, tokenSecret);
+            return true;
+        } catch (Exception exception) {
+            return false;
+        }
+    }
+
+    @Override
     public String getUsernameFromAccessToken(String token) {
         return this.getUsernameFromToken(token, this.accessTokenSecret);
     }
 
+    @Override
     public String getUsernameFromRefreshToken(String token) {
         return this.getUsernameFromToken(token, this.refreshTokenSecret);
     }
 
+    @Override
     public List<String> getRolesFromAccessToken(String token) {
         return this.getRolesFromToken(token, this.accessTokenSecret);
     }
 
+    @Override
     public List<String> getRolesFromRefreshToken(String token) {
         return this.getRolesFromToken(token, this.refreshTokenSecret);
     }
@@ -91,7 +113,7 @@ public class JwtTokenUtilsImpl implements JwtTokenUtils {
                 .subject(userDetails.getUsername())
                 .issuedAt(issuedDate)
                 .expiration(expiredDate)
-                .signWith(getSecretKey(this.accessTokenSecret))
+                .signWith(getSecretKey(secret))
                 .compact();
     }
 
@@ -99,4 +121,5 @@ public class JwtTokenUtilsImpl implements JwtTokenUtils {
         byte[] keyBytes = Decoders.BASE64.decode(secret);
         return Keys.hmacShaKeyFor(keyBytes);
     }
+
 }

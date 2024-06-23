@@ -9,15 +9,18 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.CorsConfigurer;
 import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.basic.basic_authorization_api.security.JwtAuthenticationEntryPoint;
+import com.basic.basic_authorization_api.security.JwtAuthenticationFilter;
 import com.basic.basic_authorization_api.services.UserService;
+import com.basic.basic_authorization_api.utils.JwtTokenUtils;
+import com.basic.basic_authorization_api.utils.JwtTokenUtilsImpl;
 
 import lombok.RequiredArgsConstructor;
 
@@ -36,18 +39,18 @@ public class SecurityConfig {
                 .csrf(CsrfConfigurer::disable)
                 .sessionManagement(sessionManagement -> sessionManagement
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .cors(CorsConfigurer::disable)
                 .exceptionHandling(a -> a
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
-                        .requestMatchers("basic/check-security/secured")
+                        .requestMatchers("/check-security/secured")
+                                .authenticated()        
+                        .requestMatchers("/check-security/info")
                                 .authenticated()
-                        .requestMatchers("basic/check-security/info")
-                                .authenticated()
-                        .requestMatchers("basic/check-security/admin")
+                        .requestMatchers("/check-security/admin")
                                 .hasRole("ADMIN")
                         .anyRequest().permitAll())
                 .authenticationProvider(this.authenticationProvider())
+                .addFilterBefore(this.jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .build();        
     }
 
@@ -73,4 +76,15 @@ public class SecurityConfig {
             AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
+
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter() {
+        return new JwtAuthenticationFilter(this.jwtTokenUtils(), userService);
+    }
+
+    @Bean
+    public JwtTokenUtils jwtTokenUtils() {
+        return new JwtTokenUtilsImpl();
+    }
+
 }

@@ -5,4 +5,5 @@ public class UniquenessError extends Exception {
     public UniquenessError(String message) {
         super(message);
     }
+    
 }

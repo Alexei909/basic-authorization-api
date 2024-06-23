@@ -30,4 +30,5 @@ public class Roles {
         unique = true,
         length = 50)
     private String name;
+    
 }

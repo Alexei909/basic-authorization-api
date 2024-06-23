@@ -11,4 +11,5 @@ import com.basic.basic_authorization_api.models.Roles;
 public interface RoleRepository extends CrudRepository<Roles, Integer> {
 
     Optional<Roles> findByName(String name);
+    
 }

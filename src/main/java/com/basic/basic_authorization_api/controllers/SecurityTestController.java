@@ -19,24 +19,25 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SecurityTestController {
 
-    @GetMapping("/public")
+    @GetMapping("public")
     public String publicData() {
         return "Public data";
     }
 
-    @GetMapping("/secured")
+    @GetMapping("secured")
     public String securedData() {
         return "Secured data";
     }
 
-    @GetMapping("/admin") 
+    @GetMapping("admin") 
     public String adminData() {
         return "Admin data";
     }
 
-    @GetMapping("/info")
+    @GetMapping("info")
     public String userInfo(Principal principal) {
         return "Current user is %s"
                 .formatted(principal.getName());
     }
+
 }

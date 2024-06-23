@@ -56,4 +56,5 @@ public class Users {
         inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Collection<Roles> roles;
+    
 }
